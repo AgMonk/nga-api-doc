@@ -30,3 +30,26 @@ NGA网页版实用API
 
 输入参数中可以在params中传入参数 **__inchst=UTF8** 以使用UTF-8编码，所以一般都是无脑使用这个参数
 
+## JavaScript中GBK解码方案
+
+这里是 **axios** 的解决方案，其他请求工具自行查找了
+
+在axios的请求参数中使用添加如下字段，这里一并解决了上述的 **\t** 问题
+
+```js
+responseType: 'blob',
+transformResponse: [function (data) {
+        let reader = new FileReader();
+        reader.readAsText(data, 'GBK');
+        return new Promise(resolve => {
+            reader.onload = function () {
+                let result = reader.result;
+                while (result.includes("\t")) {
+                    result = result.replace("\t", "")
+                }
+                resolve(JSON.parse(result))
+            }
+        });
+    }]
+```
+
