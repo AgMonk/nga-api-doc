@@ -13,6 +13,10 @@ NGA网页版实用API
 
 # 通用
 
+## 请求方法
+
+部分接口要求为POST，部分可以用GET，建议统一用POST
+
 ## 输出格式
 
 在params中传入 `__output` 参数，可指定返回的数据格式
@@ -32,7 +36,7 @@ NGA网页版实用API
 
 ## 输入编码
 
-输入参数中可以在params中传入参数 `__inchst=UTF8` 以使用UTF-8编码，所以一般都是无脑使用这个参数
+输入参数中可以在params中传入参数 `__inchst=UTF8` 以在传参时使用UTF-8编码，所以一般都是无脑使用这个参数。**注意 ：此参数不影响输出编码，GBK该解码的依然要解码**
 
 ## JavaScript中GBK解码方案
 
@@ -60,6 +64,8 @@ transformResponse: [function (data) {
 ## 一些Json字符串不严格的情况
 
 例如：获取提醒信息（回复提醒，赞踩提醒）的接口中返回的Json字符串结构不严格，对象的字段名使用了数字(1)而不是字符串("1")，会导致JSON.parse报错 我的解决方案是在上方 `transformResponse` 字段的方法中添加：
+
+正则前面加一个字符是为了避开value中可能出现的时间格式（如：10:00）
 
 ```js
 let r1 = /\s\d{1,2}:/g;
@@ -101,6 +107,8 @@ transformRequest:[
     }
 ],
 ```
+
+其实从网页版上的应用情况来看，有可能所有接口的所有参数都可以统一放到Form-Data下传递，总之你可以试试看。
 
 ## 时间戳
 
@@ -254,9 +262,13 @@ Params：
 
 - `__U`字段中为该页出现的用户信息，其中`__REPUTATIONS`字段为这些用户的本版声望
 
-- `__F`字段中的`custom_level`字段为本版面声望数值对应的声望等级。其值为以json字符串格式书写的一个数组。使用方法为：反向遍历该数组，当声望数值大于等于当前对象的 `r` 字段时，其 `n` 字段即为对应的声望等级。**注意这里的字段名是不严格的，解析前需要补足冒号。**
+- `__F`字段中的`custom_level`字段为本版面声望数值对应的声望等级。其值为以json字符串格式书写的一个数组。使用方法为：反向遍历该数组，当声望数值大于等于当前对象的 `r` 字段时，其 `n` 字段即为对应的声望等级。**注意这里的字段名是不严格的，解析前需要补足引号。**
 
 - `__R`字段有时为 对象有时为数组，即便是只有一个`page`参数不同也可能不一样，故如果需要前端遍历它时最好使用`Object.keys(res.__R).forEach(key=>{let item = res.__R[key]})` ~~虽然vue的v-for不受影响~~。
+
+- 匿名用户在回复中的 `authorid`为负数，在`__U`中下有对应的负数字段中 `username`字段为该匿名用户在该主题中的唯一标识（**注意 该负数不是唯一标识，每一页都可能不一样**），该唯一标识转换为常见的乱码中文的方法未明。
+
+- `alterinfo`字段中包括了回复的编辑记录（E开头）、版主的处罚记录（L开头）、处罚撤销记录（U开头）
 
 - 正文部分有部分转义字符在显示和编辑时需要替换
 
@@ -269,16 +281,160 @@ Params：
     	.replace(/&#39;/g, "'")
     ```
 
-- 
-
 ### 获取回复列表
 
 Params：
 
-| 字段     | 值               | 是否必须                             |
-| -------- | ---------------- | ------------------------------------ |
-| tid      | 主题id           | tid 和 pid 二选一 当传入pid时tid无效 |
-| pid      | 回复id           | tid 和 pid 二选一 当传入pid时tid无效 |
-| page     | 页码 不传默认为1 | 不传默认为1                          |
-| authorid | 用户uid          | 如果传入表示`只看TA`功能             |
+| 字段     | 值      | 是否必须                             |
+| -------- | ------- | ------------------------------------ |
+| tid      | 主题id  | tid 和 pid 二选一 当传入pid时tid无效 |
+| pid      | 回复id  | tid 和 pid 二选一 当传入pid时tid无效 |
+| page     | 页码    | 不传默认为1，传 e 时返回最后一页     |
+| authorid | 用户uid | 如果传入表示`只看TA`功能             |
 
+## 综合操作
+
+接口： /nuke.php
+
+### 获取指定用户信息
+
+Params：
+
+| 字段     | 值           | 是否必须                           |
+| -------- | ------------ | ---------------------------------- |
+| __lib    | 固定为 "ucp" | ✓                                  |
+| __act    | 固定为 "get" | ✓                                  |
+| uid      | 用户id       | uid和username二选一，uid优先级更高 |
+| username | 用户名       | uid和username二选一，uid优先级更高 |
+
+### 收藏版面操作
+
+Params：
+
+| 字段   | 值                         | 是否必须       |
+| ------ | -------------------------- | -------------- |
+| __lib  | 固定为 "forum_favor2"      | ✓              |
+| __act  | 固定为 "forum_favor"       | ✓              |
+| action | 有效值为 "get" "add" "del" | ✓              |
+| fid    | 版面id                     | add和del时必须 |
+
+### 子版面操作
+
+**注意该接口为两部分传参，请参考前文的 通用 章节中的相关内容**
+
+Params：
+
+| 字段      | 值                   | 是否必须                                |
+| --------- | -------------------- | --------------------------------------- |
+| __lib     | 固定为 "user_option" | ✓                                       |
+| __act     | 固定为 "set"         | ✓                                       |
+| raw       | 固定为 3             | ✓                                       |
+| del / add | id 含义后详          | 字段名选择 del 代表关注，选择 add为取关 |
+
+Form-Data：
+
+| 字段 | 值                         | 是否必须 |
+| ---- | -------------------------- | -------- |
+| fid  | 主板面id                   | ✓        |
+| type | 固定为 1                   | ✓        |
+| info | 固定为 "add_to_block_tids" | ✓        |
+
+Parmas中的 id 数据可以来自两个地方：
+
+- 主题列表中会存在已关注的子版面入口，其数据格式类似一个主题，其 `tid`字段 即为本id
+- `__F`字段中的`sub_forums`字段保存着本版面下所有子版面信息，每个信息为一个数组，其中第`4`个成员即为本id
+
+### 赞踩
+
+Form-Data：
+
+| 字段  | 值                       | 是否必须 |
+| ----- | ------------------------ | -------- |
+| __lib | 固定为 "topic_recommend" | ✓        |
+| __act | 固定为 "add"             | ✓        |
+| tid   | 主题id                   | ✓        |
+| pid   | 赞踩的回复id             | ✓        |
+| value | 1 = 赞 ， - 1  = 踩      | ✓        |
+| raw   | 固定为 3                 | ✓        |
+
+返回对象中会告诉你本次操作造成的赞踩和的变化量，例如你原本是赞，在取消赞之前直接点踩，返回的变化量为-2
+
+### 提醒消息
+
+#### 获取提醒消息
+
+Params：
+
+| 字段  | 值            | 是否必须 |
+| ----- | ------------- | -------- |
+| __lib | 固定为 "noti" | ✓        |
+| raw   | 固定为 3      | ✓        |
+
+Form-Data：
+
+| 字段       | 值               | 是否必须 |
+| ---------- | ---------------- | -------- |
+| __act      | 固定为 "get_all" | ✓        |
+| time_limit | 固定为 1         | ✓        |
+
+- 返回对象是不严格的json字符串，需按前文先行处理再解析
+
+- res.data["0"] 下是具体数据 各字段含义为：字段 `0` =  回复提醒 ，字段`1` 短消息提醒 ， 字段`2`赞踩数提醒
+
+- 一个参考的解析方法
+
+- ```js
+  // 回复提醒
+  let replies = res.data["0"]["0"];
+  replies = !replies ? undefined : replies.map(reply => {
+      return {
+          authorId: reply["1"],
+          authorName: reply["2"],
+          repliedId: reply["3"],
+          repliedName: reply["4"],
+          threadSubject: reply["5"],
+          tid: reply["6"],
+          replyPid: reply["7"],
+          repliedPid: reply["8"],
+          timestamp: reply["9"],
+          page: reply["10"],
+          timeString: new Date(reply["9"] * 1000).format("yyyy-MM-dd hh:mm:ss")
+      }
+  }).reverse();
+  
+  // 短消息提醒
+  let pm = res.data["0"]["1"];
+  pm = !pm ? undefined : pm.map(r => {
+      return {
+          authorId: r["1"],
+          authorName: r["2"],
+          mid: r["6"],
+          timestamp: r["9"],
+          timeString: new Date(r["9"] * 1000).format("yyyy-MM-dd hh:mm:ss")
+      }
+  }).reverse();
+  // 赞踩变化
+  let approbation = res.data["0"]["2"];
+  approbation = !approbation ? undefined : approbation.map(r => {
+      return {
+          uid: r["3"],
+          threadSubject: r["5"],
+          tid: r["6"],
+          pid: r["7"],
+          timestamp: r["9"],
+          timeString: new Date(r["9"] * 1000).format("yyyy-MM-dd hh:mm:ss")
+      }
+  }).reverse();
+  
+  return {replies, approbation, pm}
+  ```
+
+## 搜索版面
+
+接口：/forum.php
+
+Params：
+
+| 字段 | 值     | 是否必须 |
+| ---- | ------ | -------- |
+| key  | 关键字 | ✓        |
