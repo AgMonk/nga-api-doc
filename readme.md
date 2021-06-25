@@ -102,7 +102,39 @@ transformRequest:[
 ],
 ```
 
+## 时间戳
 
+NGA所有涉及到时间戳的地方，均使用的为UNIX秒，在转换为实际时间时应当使用 `new Date(timestamp*1000)`
+
+另外还可以为Date对象添加一个原型方法：
+
+```js
+Date.prototype.format = function (fmt) {
+  let o = {
+    "M+": this.getMonth() + 1,                 //月份
+    "d+": this.getDate(),                    //日
+    "h+": this.getHours(),                   //小时
+    "m+": this.getMinutes(),                 //分
+    "s+": this.getSeconds(),                 //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds()             //毫秒
+  };
+
+  if (/(y+)/.test(fmt)) {
+    fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+  }
+
+  for (let k in o) {
+    if (new RegExp("(" + k + ")").test(fmt)) {
+      fmt = fmt.replace(
+        RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    }
+  }
+  return fmt;
+}
+```
+
+即可使用 `new Date(timestamp*1000).format("yyyy-MM-dd hh:mm:ss")`输出为常见的时间格式
 
 # API
 
@@ -216,5 +248,37 @@ Params：
 
 ### 响应对象的一些说明
 
-- 评论贴条的正文内容保存在被评论回复的 `comment` 字段中
-- 热评内容保存在主楼的`hotreply`字段中
+- 评论贴条的正文内容保存在被评论回复的 `comment` 字段中，其所在楼层无正文内容。
+
+- 热评内容保存在主楼的`hotreply`字段中，其所在楼层也有相同内容。
+
+- `__U`字段中为该页出现的用户信息，其中`__REPUTATIONS`字段为这些用户的本版声望
+
+- `__F`字段中的`custom_level`字段为本版面声望数值对应的声望等级。其值为以json字符串格式书写的一个数组。使用方法为：反向遍历该数组，当声望数值大于等于当前对象的 `r` 字段时，其 `n` 字段即为对应的声望等级。**注意这里的字段名是不严格的，解析前需要补足冒号。**
+
+- `__R`字段有时为 对象有时为数组，即便是只有一个`page`参数不同也可能不一样，故如果需要前端遍历它时最好使用`Object.keys(res.__R).forEach(key=>{let item = res.__R[key]})` ~~虽然vue的v-for不受影响~~。
+
+- 正文部分有部分转义字符在显示和编辑时需要替换
+
+  - ```js
+    reply.content = reply.content.toString()
+    	.replace(/&quot;/g, "\"")
+    	.replace(/&amp;/g, "&")
+    	.replace(/&lt;/g, "<")
+    	.replace(/&gt;/g, ">")
+    	.replace(/&#39;/g, "'")
+    ```
+
+- 
+
+### 获取回复列表
+
+Params：
+
+| 字段     | 值               | 是否必须                             |
+| -------- | ---------------- | ------------------------------------ |
+| tid      | 主题id           | tid 和 pid 二选一 当传入pid时tid无效 |
+| pid      | 回复id           | tid 和 pid 二选一 当传入pid时tid无效 |
+| page     | 页码 不传默认为1 | 不传默认为1                          |
+| authorid | 用户uid          | 如果传入表示`只看TA`功能             |
+
