@@ -11,7 +11,7 @@ NGA网页版实用API
 
 但接口的响应对象各字段含义依然可以按照官方文档。
 
-# 各接口通用参数
+# 通用
 
 ## 输出格式
 
@@ -80,6 +80,26 @@ while (res = r2.exec(result)){
 		+`"`+result.substring(startIndex,endIndex).trim()
 		+`"`+result.substring(endIndex)
 }
+```
+
+## 部分需要使用Form-Data传参的情况
+
+部分接口需要同时在Params和From-Data中传入不同的参数，为此需要把`Headers`的`Content-Type`设置为`application/x-www-form-urlencoded`
+
+Axios的参考方案，在配置对象中使用如下字段
+
+```js
+headers:{'Content-Type': 'application/x-www-form-urlencoded'},
+transformRequest:[
+    function (data) {
+        let ret = ''
+        for (let it in data) {
+            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+        }
+        ret = ret.substring(0, ret.lastIndexOf('&'));
+        return ret
+    }
+],
 ```
 
 
