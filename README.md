@@ -90,9 +90,9 @@ while (res = r2.exec(result)){
 
 ## 使用Form-Data传参
 
-目前看来所有参数都可以在Params或From-Data中传入，鉴于Params的长度限制问题（特别是回复正文），推荐所有参数通过Form-Data传递，为此需要把`Headers`的`Content-Type`设置为`application/x-www-form-urlencoded`
+目前看来所有参数都可以在Params或Form-Data中传入，鉴于Params的长度限制问题（特别是回复正文），推荐所有参数通过Form-Data传递，为此需要把`Headers`的`Content-Type`设置为`application/x-www-form-urlencoded`
 
-Axios的参考方案，在配置对象中使用如下字段
+Axios的参考方案，在配置对象中使用如下字段，此时`data`字段的内容即被作为`Form-Data`传递
 
 ```js
 headers:{'Content-Type': 'application/x-www-form-urlencoded'},
@@ -107,6 +107,8 @@ transformRequest:[
     }
 ],
 ```
+
+注意：附件上传部分的请求并不使用本方法；我本人是使用`Element-plus ` 提供的上传组件，并没使用`axios`执行过上传操作。
 
 ## 时间戳
 
