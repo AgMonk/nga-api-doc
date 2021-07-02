@@ -243,10 +243,10 @@ Params：
 
 Params：
 
-| 字段 | 值               | 是否必须    |
-| ---- | ---------------- | ----------- |
-| stid | 合集tid          | ✓           |
-| page | 页码 不传默认为1 | 不传默认为1 |
+| 字段 | 值      | 是否必须    |
+| ---- | ------- | ----------- |
+| stid | 合集tid | ✓           |
+| page | 页码    | 不传默认为1 |
 
 ## 获取主题内容/回复
 
@@ -268,20 +268,17 @@ Params：
 
 - `alterinfo`字段中包括了回复的编辑记录（E开头）、版主的处罚记录（L开头）、处罚撤销记录（U开头）
 
-- 
+- 正文部分有部分转义字符(& quot; 等)在显示和编辑时需要反转义
 
-- 正文部分有部分转义字符在显示和编辑时需要替换
-
-  - 
-    
-    ```js
-    reply.content = reply.content.toString()
-    	.replace(/&quot;/g, "\"")
-    	.replace(/&amp;/g, "&")
-    	.replace(/&lt;/g, "<")
-    	.replace(/&gt;/g, ">")
-    	.replace(/&#39;/g, "'")
-    ```
+  ```js
+  export const unEscape = (text) => {
+      let temp = document.createElement("div");
+      temp.innerHTML = text.replace(/<br\/>/g, "\n");
+      let output = temp.innerText || temp.textContent;
+      temp = null;
+      return output;
+  }
+  ```
 
 ### 获取回复列表
 
