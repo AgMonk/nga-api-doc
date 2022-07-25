@@ -150,64 +150,66 @@ Date.prototype.format = function (fmt) {
 
 接口： /thread.php
 
-### 响应对象的一些说明
+### 标题字体的数据解析方法
+
+- 参照官方文档章节： 2.5 主题其他数据(topic_misc)
 
 - 主题标题的字体为 `titlefont` 或 `topic_misc`字段
 
-  - 部分颜色对照
+JS实现:
 
-  - 官方文档有说明实际的解析方法，但是个人认为实际情况没那么复杂，可以直接用map
+```js
 
-  - 倒数第二位为`C`的即为加粗
-
-  - ```json
-     [
-      {value: "AQAAAAA", key: "灰色普通"},
-      {value: "AQAAACA", key: "灰色加粗"},
-      {value: "AQAAAAE", key: "红色普通"},
-      {value: "AQAAACE", key: "红色加粗"},
-      {value: "AQAAAAQ", key: "绿色普通"},
-      {value: "AQAAACQ", key: "绿色加粗"},
-      {value: "AQAAAAI", key: "蓝色普通"},
-      {value: "AQAAACI", key: "蓝色加粗"},
-      {value: "AQAAAAg", key: "棕色普通"},
-      {value: "AQAAACg", key: "棕色加粗"},
-    ]
-    ```
-
-  - 根据以上表格的参考CSS生成方法
-
-  - ```js
-    export const titleStyle = (titleFont)=> {
-      let s = "";
-      if (titleFont) {
-        s += titleFont[5] === 'C' ? "font-weight: bold;" : "";
-      } else {
-        // console.log(titleFont)
-        return s;
-      }
-      switch (titleFont[6]) {
-        case "A":
-          s += "color: gray;";
-          break;
-        case "E":
-          s += "color: red;";
-          break;
-        case "Q":
-          s += "color: green;";
-          break;
-        case "I":
-          s += "color: blue;";
-          break;
-        case "g":
-          s += "color: #A06700;";
-          break;
-      }
-      return s;
+export const parseTitleFont = (data) => {
+    //将字串使用base64解码，并切割为单字节数组
+    const s = window.atob(data).split("");
+    //将各字节转换为8位二进制数组（补齐位数）
+    const array = s
+        .map(i => bin2UInt(i).toString(2))
+        .map(i => ('00000000' + i).slice(-8));
+    const res = {}
+    //以5为步长循环该数组（如果为合集主题array长度为10，否则为5）
+    for (let i = 0; i < array.length - 1; i += 5) {
+        //首字节表示数据类型
+        const type = parseInt(array[i], 2) === 2 ? "stid" : 'bit'
+        //将后续4个字节数据拼接并转换为十进制数
+        let bit = parseInt(array.slice(i + 1, i + 5).join(''), 2)
+        if (type === 'stid') {
+            //如果数据类型为1 ， 表示bit为集合id
+            res.stid = bit;
+        }
+        if (type === 'bit') {
+            //如果是字体数据，把数据转换为2进制字符串，并反向方便后续处理
+            res.titleFont = bit.toString(2).split("").reverse().join('')
+        }
     }
-    ```
+    return res
+}
 
-- dfsd
+//二进制字符串转为多字节整数(big-endian)
+export const bin2UInt = (x) => {
+    let z = 0, y = 0;
+    for (let i = 0; i < x.length; i++) {
+        y = x.charCodeAt(i)
+        //如果输入字符串中有utf16字符则一次移动两字节
+        z = (z << (y > 255 ? 16 : 8)) + y
+    }
+    return z
+}
+
+```
+
+最终返回的 `res.titleFont` 为由01组成的字符串，根据每一位的值为 0（否） ，1（是），决定主题字体的格式，位数不存在等效于0
+
+| 位数 | 含义       | 位数 | 含义   |
+| ---- | ---------- | ---- | ------ |
+| 1    | 红色       | 6    | 加粗   |
+| 2    | 蓝色       | 7    | 斜体   |
+| 3    | 绿色       | 8    | 删除线 |
+| 4    | 橙（棕）色 |      |        |
+| 5    | 银（灰）色 |      |        |
+
+其中删除线可对应 CSS： text-decoration:line-through
 
 ### 获取本账号的收藏主题
 
@@ -266,7 +268,7 @@ Params：
 
 - `__R`字段有时为 对象有时为数组，即便是只有一个`page`参数不同也可能不一样，故如果需要前端遍历它时最好使用`Object.keys(res.__R).forEach(key=>{let item = res.__R[key]})` ~~虽然vue的v-for不受影响~~。
 
-- 匿名用户在回复中的 `authorid`为负数，在`__U`中下有对应的负数字段中 `username`字段为该匿名用户在该主题中的唯一标识（**注意 该负数不是唯一标识，每一页都可能不一样**）。
+- 匿名用户在回复中的 `authorid`为负数，在`__U`中下有对应的负数字段中 `username`字段为该匿名用户在该主题中的唯一标识（**注意 该负数不是唯一标识，每一页都可能不一样**），。
 
 - `alterinfo`字段中包括了回复的编辑记录（E开头）、版主的处罚记录（L开头）、处罚撤销记录（U开头）
 
