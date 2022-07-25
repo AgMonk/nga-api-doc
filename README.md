@@ -215,9 +215,9 @@ export const bin2UInt = (x) => {
 
 Params：
 
-| 字段  | 值     |
-| ----- | ------ |
-| favor | 任意值 |
+| 字段  | 值                            |
+| ----- | ----------------------------- |
+| favor | 收藏夹id ， 填1则为默认收藏夹 |
 
 如： https://bbs.nga.cn/thread.php?favor=1&__output=11
 
@@ -354,6 +354,15 @@ Params：
 | __act  | 固定为 "forum_favor"       | ✓              |
 | action | 有效值为 "get" "add" "del" | ✓              |
 | fid    | 版面id                     | add和del时必须 |
+
+### 获取本账号的收藏夹列表
+
+Params：
+
+| 字段  | 值                      | 是否必须 |
+| ----- | ----------------------- | -------- |
+| __lib | 固定为 "topic_favor_v2" | ✓        |
+| __act | 固定为 "list_folder"    | ✓        |
 
 ### 子版面操作
 
