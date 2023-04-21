@@ -17,6 +17,10 @@ NGA网页版实用API
 
 部分接口要求为POST，部分可以用GET，建议统一用POST
 
+## User-Agent
+
+header中的这个字段设置为`NGA_WP_JW`，可以拿到更多信息，如用户信息中的部分字段，非该值时是拿不到数据的。
+
 ## 输出格式
 
 在params中传入 `__output` 参数，可指定返回的数据格式
@@ -318,7 +322,7 @@ export const getAnonyName = (name) => {
 }
 
 
-// #anony_8905635a3dc3a79511fc6217423df746
+// #anony_8905635a3dc3a79511fc6217423df746 --> 壬柯顾己蓝应
 ```
 
 ## 综合操作
