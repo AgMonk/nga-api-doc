@@ -85,7 +85,7 @@ transformResponse: [function (data) {
 ## JSON格式不严谨的情况
 
 1. 回复对象的`alterinfo`字段中会出现`\t`字符，会导致解析报错；同时私信的参与用户列表字段也将它作为分隔符使用；因此不能简单地删除所有`\t`字符，建议的处理方法是先替换为其他字符，解析为JSON之后再分别处理。
-2. 个别字段以数字而不是"数字"作为字段名，可能导致解析报错；个别字段以JSON字符串保存数据，字段名也没有带引号；可以使用这个正则表达式`([,{ ])(\\w+?):`（注意空格不能删），将其替换为`$1\"$2\":`来添加引号。
+2. 个别字段以数字而不是"数字"作为字段名，可能导致解析报错；版面数据的`custom_level`字段以JSON字符串保存数据，字段名也没有带引号；可以使用这个正则表达式`([,{ ])(\\w+?):`（注意空格不能删），将其替换为`$1\"$2\":`来添加引号。
 3. 个别字段可能出现有时为数组，有时为对象(以数字为字段名)的情况，因此遍历时需要采取一些通用方式。
 
 ## 时间戳
@@ -126,3 +126,72 @@ export const getAnonyName = (name) => {
 
 正文中引用表情的格式为：`[s:组名称:表情名称]`， 对应的图片绝对路径为在图片名称前添加前缀：`https://img4.nga.178.com/ngabbs/post/smile/`
 
+## 标题字体数据的解析方法
+
+原始数据来自主题数据的`topic_misc`字段，参考官方文档`2.5.2`章节
+
+`JS`的参考实现：
+
+```js
+export const parseTitleFont = (data) => {
+    //将字串使用base64解码，并切割为单字节数组
+    const s = window.atob(data).split("");
+    //将各字节转换为8位二进制数组（补齐位数）
+    const array = s
+        .map(i => bin2UInt(i).toString(2))
+        .map(i => ('00000000' + i).slice(-8));
+    const res = {}
+    //以5为步长循环该数组（如果为合集主题array长度为10，否则为5）
+    for (let i = 0; i < array.length - 1; i += 5) {
+        //首字节表示数据类型
+        const type = parseInt(array[i], 2) === 2 ? "stid" : 'bit'
+        //将后续4个字节数据拼接并转换为十进制数
+        let bit = parseInt(array.slice(i + 1, i + 5).join(''), 2)
+        if (type === 'stid') {
+            //如果数据类型为1 ， 表示bit为集合id
+            res.stid = bit;
+        }
+        if (type === 'bit') {
+            //如果是字体数据，把数据转换为2进制字符串，并反向方便后续处理
+            res.titleFont = bit.toString(2).split("").reverse().join('')
+        }
+    }
+    return res
+}
+
+//二进制字符串转为多字节整数(big-endian)
+export const bin2UInt = (x) => {
+    let z = 0, y = 0;
+    for (let i = 0; i < x.length; i++) {
+        y = x.charCodeAt(i)
+        //如果输入字符串中有utf16字符则一次移动两字节
+        z = (z << (y > 255 ? 16 : 8)) + y
+    }
+    return z
+}
+
+```
+
+最终返回的 `res.titleFont` 为由01组成的字符串，根据每一位的值为 0（否） ，1（是），决定主题字体的格式，位数不存在等效于0
+
+| 位数 | 含义       | 位数 | 含义   |
+| ---- | ---------- | ---- | ------ |
+| 1    | 红色       | 6    | 加粗   |
+| 2    | 蓝色       | 7    | 斜体   |
+| 3    | 绿色       | 8    | 删除线 |
+| 4    | 橙（棕）色 |      |        |
+| 5    | 银（灰）色 |      |        |
+
+其中删除线可对应 CSS：` text-decoration:line-through`
+
+# API
+
+## thread
+
+## read
+
+## forum
+
+## post
+
+## nuke

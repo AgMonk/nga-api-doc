@@ -163,7 +163,6 @@ Date.prototype.format = function (fmt) {
 JS实现:
 
 ```js
-
 export const parseTitleFont = (data) => {
     //将字串使用base64解码，并切割为单字节数组
     const s = window.atob(data).split("");
