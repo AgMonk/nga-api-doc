@@ -489,4 +489,46 @@ export const bin2UInt = (x) => {
 
 #### 查询
 
+| 参数名 | 取值         |
+| ------ | ------------ |
+| __lib  | forum_favor2 |
+| __act  | forum_favor  |
+| action | get          |
+
 #### 修改
+
+| 参数名     | 取值             |
+| ---------- | ---------------- |
+| __lib      | forum_favor2     |
+| __act      | forum_favor      |
+| action     | add 或 del       |
+| fid / stid | 版面id 或 合集id |
+
+### 收藏主题操作
+
+#### 查询
+
+见`thread.php`接口的操作
+
+#### 添加
+
+| 参数名 | 取值                           |
+| ------ | ------------------------------ |
+| __lib  | topic_favor_v2                 |
+| __act  | add                            |
+| action | add                            |
+| folder | 收藏夹id，默认收藏夹填`1`      |
+| tid    | 主题id                         |
+| pid    | 如果要收藏的是回复，填写回复id |
+
+#### 删除
+
+| 参数名   | 取值                                                         |
+| -------- | ------------------------------------------------------------ |
+| __lib    | topic_favor                                                  |
+| __act    | topic_favor                                                  |
+| action   | del                                                          |
+| raw      | 3                                                            |
+| tid      | 主题id                                                       |
+| page     | 要删除的条目在列表页面中的页码                               |
+| tidarray | 要删除的条目id，如果是主题直接写`主题id`，如果是回复写`主题id_回复id`，多个用逗号隔开 |
