@@ -673,3 +673,45 @@ export const bin2UInt = (x) => {
 | action | del_block |
 | buids  | 用户id    |
 
+### 点赞、点踩
+
+| 参数名 | 取值               |
+| ------ | ------------------ |
+| __lib  | topic_recommend    |
+| __act  | add                |
+| tid    | 主题id             |
+| pid    | 回复id             |
+| value  | 赞 = `1` 踩 = `-1` |
+
+响应中将会返回本次操作后的总赞数变动数值，如从赞改踩的变动数值为`-2`
+
+### 设置签名
+
+推荐使用`Form-Data`传参
+
+| 参数名 | 取值     |
+| ------ | -------- |
+| __lib  | set_sign |
+| __act  | set      |
+| raw    | 3        |
+| uid    | 用户id   |
+| sign   | 签名正文 |
+
+### 查询版面的主题分类
+
+| 参数名 | 取值      |
+| ------ | --------- |
+| __lib  | topic_key |
+| __act  | get       |
+| fid    | 版面id    |
+
+### 查询用户信息
+
+用户id和用户名二选一
+
+| 参数名   | 取值   |
+| -------- | ------ |
+| __lib    | ucp    |
+| __act    | get    |
+| uid      | 用户id |
+| username | 用户名 |
