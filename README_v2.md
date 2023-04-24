@@ -30,7 +30,7 @@ NGA的接口API地址均为在域名后加`*.php`，除上传以外有如下API�
 
 
 
-Axios的参考方案，在配置对象中使用如下字段，此时`data`字段的内容即被作为`Form-Data`传递
+`axios`的参考方案，在配置对象中使用如下字段，此时`data`字段的内容即被作为`Form-Data`传递
 
 ```js
 headers:{'Content-Type': 'application/x-www-form-urlencoded'},
@@ -46,6 +46,10 @@ transformRequest:[
 ],
 ```
 
+
+
+传入参数`__inchst=UTF8` 可以在传参时使用UTF-8编码，建议无脑使用；注意：它不影响响应编码，GBK依然需要解码。
+
 ## User-Agent
 
 将header中的`User-Agent`字段设置为`NGA_WP_JW`，可以拿到更多信息，如用户信息中的部分字段，非该值时是拿不到数据的。
@@ -57,6 +61,68 @@ transformRequest:[
 - `8`：`GBK`编码返回`json`数据
 - `11`：`UTF-8`编码返回`json`数据
 
-11在以前会有概率出现乱码，但是似乎已经修复，如果测试没有问题建议直接使用11
+注意：
 
-注意，如果使用8，解码时建议使用`GB18030`字符集，否则部分繁体字可能无法正确解码。
+- `11`在以前会有概率出现乱码，但是似乎已经修复，如果测试没有问题建议直接使用`11`
+- `8`在解码时建议使用`GB18030`字符集，否则部分繁体字可能无法正确解码。
+
+`axios`的解码方案参考：
+
+```js
+responseType: 'blob',
+transformResponse: [function (data) {
+        let reader = new FileReader();
+        reader.readAsText(data, 'GBK');
+        return new Promise(resolve => {
+            reader.onload = function () {
+                let result = reader.result;           
+                resolve(JSON.parse(result))
+            }
+        });
+    }]
+```
+
+## JSON格式不严谨的情况
+
+1. 回复对象的`alterinfo`字段中会出现`\t`字符，会导致解析报错；同时私信的参与用户列表字段也将它作为分隔符使用；因此不能简单地删除所有`\t`字符，建议的处理方法是先替换为其他字符，解析为JSON之后再分别处理。
+2. 个别字段以数字而不是"数字"作为字段名，可能导致解析报错；个别字段以JSON字符串保存数据，字段名也没有带引号；可以使用这个正则表达式`([,{ ])(\\w+?):`（注意空格不能删），将其替换为`$1\"$2\":`来添加引号。
+3. 个别字段可能出现有时为数组，有时为对象(以数字为字段名)的情况，因此遍历时需要采取一些通用方式。
+
+## 时间戳
+
+所有使用时间戳的地方，均使用的为`UNIX时间戳`，单位为“秒”。在JS中可以使用`new Date(timestamp*1000)`转换为`Date`对象
+
+## 匿名唯一标识转换为对应中文乱码的方法
+
+从官方文件 [js_commonui.js](https://img4.nga.178.com/common_res/js_commonui.js) 中获知 ，可搜索 “甲乙丙丁”
+
+略微修改如下:
+
+```js
+const t1 = "甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥"
+const t2 = '王李张刘陈杨黄吴赵周徐孙马朱胡林郭何高罗郑梁谢宋唐许邓冯韩曹曾彭萧蔡潘田董袁于余叶蒋杜苏魏程吕丁沈任姚卢傅钟姜崔谭廖范汪陆金石戴贾韦夏邱方侯邹熊孟秦白江阎薛尹段雷黎史龙陶贺顾毛郝龚邵万钱严赖覃洪武莫孔汤向常温康施文牛樊葛邢安齐易乔伍庞颜倪庄聂章鲁岳翟殷詹申欧耿关兰焦俞左柳甘祝包宁尚符舒阮柯纪梅童凌毕单季裴霍涂成苗谷盛曲翁冉骆蓝路游辛靳管柴蒙鲍华喻祁蒲房滕屈饶解牟艾尤阳时穆农司卓古吉缪简车项连芦麦褚娄窦戚岑景党宫费卜冷晏席卫米柏宗瞿桂全佟应臧闵苟邬边卞姬师和仇栾隋商刁沙荣巫寇桑郎甄丛仲虞敖巩明佘池查麻苑迟邝'
+
+export const getAnonyName = (name) => {
+    let i = 6;
+
+    let s = ""
+    for (let j = 0; j < 6; j++) {
+        if (j === 0 || j === 3)
+            s += t1.charAt(('0x0' + name.substr(i + 1, 1)) - 0)
+        else if (j < 6)
+            s += t2.charAt(('0x' + name.substr(i, 2)) - 0)
+        i += 2
+    }
+    return s
+}
+
+
+// #anony_8905635a3dc3a79511fc6217423df746 --> 壬柯顾己蓝应
+```
+
+## 官方表情包
+
+可以通过请求[这个JS文件](https://img4.nga.178.com/common_res/js_bbscode_core.js)获得，其中的`ubbcode.smiles`对象即为表情数据，第一层级的key为表情分组名称，分组内的key为表情名称，value为对应的图片名称；分组内的key`_______name`为该分组的中文名。
+
+正文中引用表情的格式为：`[s:组名称:表情名称]`， 对应的图片绝对路径为在图片名称前添加前缀：`https://img4.nga.178.com/ngabbs/post/smile/`
+
