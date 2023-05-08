@@ -228,13 +228,23 @@ export const bin2UInt = (x) => {
 
 ### 首页版面入口
 
-直接请求：
+直接：
 
 ```
 https://img4.nga.178.com/proxy/cache_attach/bbs_index_data.js
 ```
 
 去掉前缀之后解析为JSON即可
+
+### 官方表情
+
+请求
+
+```
+https://img4.nga.178.com/common_res/js_bbscode_core.js
+```
+
+以`ubbcode.smiles `开头的对象
 
 ## thread.php
 
