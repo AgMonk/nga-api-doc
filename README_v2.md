@@ -224,6 +224,18 @@ export const bin2UInt = (x) => {
 - 所有表示`是否xxx`的参数，除非有特别说明，均为`1`表示`true`,`0`或不传表示`false`。
 - 所有需要填写回复ID（PID）的地方，当同时传递了主题ID（TID）时，PID取0表示该主题的主楼。
 
+## 静态资源
+
+### 首页版面入口
+
+直接请求：
+
+```
+https://img4.nga.178.com/proxy/cache_attach/bbs_index_data.js
+```
+
+去掉前缀之后解析为JSON即可
+
 ## thread.php
 
 该接口的参数可以有多种组合，我们按照应用场合来对其进行组合
