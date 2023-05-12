@@ -746,3 +746,4 @@ https://img4.nga.178.com/common_res/js_bbscode_core.js
 | __act  | report   |
 | tid    | 主题id   |
 | pid    | 回复id   |
+| info   | 举报理由 |
