@@ -72,7 +72,7 @@ transformRequest:[
 responseType: 'blob',
 transformResponse: [function (data) {
         let reader = new FileReader();
-        reader.readAsText(data, 'GBK');
+        reader.readAsText(data, 'GB18030');
         return new Promise(resolve => {
             reader.onload = function () {
                 let result = reader.result;           
