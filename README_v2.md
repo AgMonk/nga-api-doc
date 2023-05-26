@@ -747,3 +747,21 @@ https://img4.nga.178.com/common_res/js_bbscode_core.js
 | tid    | 主题id   |
 | pid    | 回复id   |
 | info   | 举报理由 |
+
+### 查询道具信息
+
+| 参数名 | 取值   |
+| ------ | ------ |
+| func   | item   |
+| act    | info   |
+| types  | 字符串 |
+
+详见： https://bbs.nga.cn/read.php?pid=130386150  17.3 获得指定道具的信息
+
+### 查询版面权限信息
+
+| 参数名 | 取值           |
+| ------ | -------------- |
+| __lib  | view_privilege |
+| __act  | view           |
+| fid    | 版面id         |
