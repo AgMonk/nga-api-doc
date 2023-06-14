@@ -219,6 +219,12 @@ export const bin2UInt = (x) => {
 |26|审核不通过|经过了人工审核，且被判定为不通过|
 |27|未知|未知状态|
 
+## 随机数的计算方法(dice)
+
+官方计算方法来自文件: https://img4.nga.178.com/common_res/js_bbscode_core.js
+
+
+
 # API
 
 - 所有表示`是否xxx`的参数，除非有特别说明，均为`1`表示`true`,`0`或不传表示`false`。
