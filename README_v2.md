@@ -244,8 +244,8 @@ const rnd = (seed) => {
 
 计算顺序：
 
-- 所有[collapse]外面的[dice]，按书写顺序计算
-- 所有[collapse]内部的[dice]，按书写顺序计算
+1. 先所有[collapse]外面的[dice]，按书写顺序计算
+2. 在所有[collapse]内部的[dice]，按书写顺序计算
 
 # API
 
