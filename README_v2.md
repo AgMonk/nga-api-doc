@@ -223,7 +223,29 @@ export const bin2UInt = (x) => {
 
 官方计算方法来自文件: https://img4.nga.178.com/common_res/js_bbscode_core.js
 
+随机种子初始值为：该回复的作者UID + 本帖TID + 本回复PID
 
+根据一个种子计算一个结果和新种子的方法为：
+
+```js
+const rnd = (seed) => {
+    // 计算一个新种子
+    let a = ((seed * 9301 + 49297) % 233280)
+    let b = a / 233280.0
+    // 返回一个结果
+    return {
+        seed: a,
+        result: b,
+    }
+}
+```
+
+其中`result`为计算结果，乘以roll点范围向上取整即为最终结果，`seed`为下一次计算的种子。
+
+计算顺序：
+
+- 所有[collapse]外面的[dice]，按书写顺序计算
+- 所有[collapse]内部的[dice]，按书写顺序计算
 
 # API
 
