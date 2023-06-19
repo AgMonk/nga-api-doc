@@ -223,7 +223,7 @@ export const bin2UInt = (x) => {
 
 官方计算方法来自文件: https://img4.nga.178.com/common_res/js_bbscode_core.js
 
-随机种子初始值为：该回复的作者UID + 本帖TID + 本回复PID
+随机种子初始值为：该回复的作者UID + 本帖TID + 本回复PID，如果所有dice标签都处在折叠块中则初始种子+1
 
 根据一个种子计算一个结果和新种子的方法为：
 
