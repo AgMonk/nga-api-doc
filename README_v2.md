@@ -828,3 +828,33 @@ https://img4.nga.178.com/common_res/js_bbscode_core.js
 | ------ | -------- |
 | __lib  | home     |
 | __act  | category |
+
+### 论坛热帖
+
+| 参数名 | 取值        |
+| ------ | ----------- |
+| __lib  | home        |
+| __act  | recmthreads |
+
+### 首页推荐
+
+| 参数名 | 取值      |
+| ------ | --------- |
+| __lib  | home      |
+| __act  | tagforums |
+
+### 版面热帖
+
+| 参数名 | 取值                  |
+| ------ | --------------------- |
+| __lib  | subject               |
+| __act  | hot                   |
+| fid    | 版面id                |
+| days   | 时限, 取值 = 1，7，30 |
+
+### 提醒消息
+
+| 参数名 | 取值   |
+| ------ | ------ |
+| __lib  | notify |
+| __act  | list   |
