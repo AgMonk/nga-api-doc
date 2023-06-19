@@ -815,3 +815,16 @@ https://img4.nga.178.com/common_res/js_bbscode_core.js
 | __lib  | view_privilege |
 | __act  | view           |
 | fid    | 版面id         |
+
+## app_api.php
+
+疑似为APP专用的接口，但是网页端也是可以访问的
+
+### 首页版面入口
+
+与“静态资源”部分相同的数据，有一些额外的东西
+
+| 参数名 | 取值     |
+| ------ | -------- |
+| __lib  | home     |
+| __act  | category |
