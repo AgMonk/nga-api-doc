@@ -247,6 +247,10 @@ const rnd = (seed) => {
 1. 先所有[collapse]外面的[dice]，按书写顺序计算
 2. 在所有[collapse]内部的[dice]，按书写顺序计算
 
+## 用户头像BUFF
+
+用户身上可能存在一些会修改头像的buff，buff数据的第 6 位记录的id对应了修改的头像，映射关系见 https://img4.nga.178.com/common_res/js_commonui.js ，搜索`用户头像选择`，图片地址前缀为：`https://img4.nga.178.com/ngabbs/face/`
+
 # API
 
 - 所有表示`是否xxx`的参数，除非有特别说明，均为`1`表示`true`,`0`或不传表示`false`。
