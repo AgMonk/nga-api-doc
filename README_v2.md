@@ -811,12 +811,12 @@ https://img4.nga.178.com/common_res/js_bbscode_core.js
 
 #### 关注 / 取关
 
-| 参数名 | 取值       |
-| ------ | ---------- |
-| __lib  | follow_v2  |
-| __act  | follow     |
-| type   | 后详       |
-| id     | 目标用户id |
+| 参数名 | 取值         |
+| ------ | ------------ |
+| __lib  | follow_v2    |
+| __act  | follow       |
+| type   | 后详         |
+| id     | 根据type决定 |
 
 type字段的取值：（来自 https://img4.nga.178.com/common_res/js_commonui.js?5871263)
 
@@ -828,6 +828,8 @@ type字段的取值：（来自 https://img4.nga.178.com/common_res/js_commonui.
 - 取消关注回复：32
 - 关注用户的回复：64
 - 取消关注用户的回复：128
+
+目前仅观察到 关注、取关用户是有效的。
 
 #### 查询关注列表
 
